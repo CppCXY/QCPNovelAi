@@ -357,7 +357,7 @@ class NovelAiImage:
             file_md5.update("{}{}".format(str(sender_id), novel_tag).encode("utf-8"))
             img_md5 = file_md5.hexdigest()
 
-            async for img in api.high_level.generate_image(novel_tag, novel_model, preset):
+            async for _, img in api.high_level.generate_image(novel_tag, novel_model, preset):
                 with open("novelai-{}-img.png".format(img_md5), "wb") as f:
                     f.write(img)
 
