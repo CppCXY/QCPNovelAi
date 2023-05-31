@@ -24,14 +24,14 @@ from aiohttp import ClientSession
 
 from pkg.plugin.host import PluginHost, EventContext
 from pkg.plugin.models import *
-from plugins.QCPNovelAi.novelai_api.BanList import BanList
-from plugins.QCPNovelAi.novelai_api.BiasGroup import BiasGroup
-from plugins.QCPNovelAi.novelai_api.GlobalSettings import GlobalSettings
-from plugins.QCPNovelAi.novelai_api.ImagePreset import ImageModel, ImagePreset, ImageResolution, ImageSampler, UCPreset
-from plugins.QCPNovelAi.novelai_api.NovelAI_API import NovelAIAPI
-from plugins.QCPNovelAi.novelai_api.Preset import Model, Preset
-from plugins.QCPNovelAi.novelai_api.Tokenizer import Tokenizer
-from plugins.QCPNovelAi.novelai_api.utils import get_encryption_key, b64_to_tokens
+from novelai_api.BanList import BanList
+from novelai_api.BiasGroup import BiasGroup
+from novelai_api.GlobalSettings import GlobalSettings
+from novelai_api.ImagePreset import ImageModel, ImagePreset, ImageResolution, ImageSampler, UCPreset
+from novelai_api.NovelAI_API import NovelAIAPI
+from novelai_api.Preset import Model, Preset
+from novelai_api.Tokenizer import Tokenizer
+from novelai_api.utils import get_encryption_key, b64_to_tokens
 
 
 class API:
