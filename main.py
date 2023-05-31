@@ -348,8 +348,8 @@ class NovelAiImage:
             if novel_noise:
                 preset["noise"] = novel_noise
             if novel_bad_tag:
-                # preset.uc_preset(novel_model, novel_bad_tag)
-                preset["uc_preset"] = UCPreset.Preset_Low_Quality
+                preset["uc"] = novel_bad_tag
+                # preset["uc_preset"] = UCPreset.Preset_Low_Quality
 
             # hash md5不唯一生成图片 Tag加上发送者QQ号码
             sender_id = kwargs.get("sender_id")
@@ -462,31 +462,46 @@ https://github.com/dominoar/QCP-NovelAi"""
             launcher_id = kwargs.get("launcher_id")
             launcher_type = kwargs.get("launcher_type")
             # 判断是否是帮助信息
-            person_msg += "\x20"
-            lite_cmds = re.findall(r"(-.)\x20(.*?)\x20", person_msg)
-            long_cmds = re.findall(r"(--.*?)\x20(.*?)\x20", person_msg)
-            try:
-                bad_tag = re.findall(r"(negative prompt):\x20(.*?)\x20", person_msg)[0]
-            except IndexError:
-                bad_tag = ("-u", None)
-            tag = re.sub(
-                "{}{}".format(draw_cmd,
-                              "|(-.)\x20(.*?)\x20|(--.*?)\x20(.*?)\x20|(negative\x20prompt):\x20(.*?)\x20"),
-                "",
-                person_msg)
-            # 提纯
-            tag = re.sub("^\x20+|\x20+$", "", tag)
+            person_msg = person_msg.replace("\u00a0", "")
+            if person_msg.startswith("绘画"):
+                person_msg = person_msg.lstrip("绘画")
+
+            prompts = []
+            nprompts = []
+            setting = ""
+
+            for line in person_msg.split('\n'):
+                line = line.strip()
+                if line.startswith("prompt:"):
+                    prompts.append(line[len("prompt:"):])
+                elif line.startswith("nprompt:"):
+                    nprompts.append(line[len("nprompt:"):])
+                elif line.startswith("setting:"):
+                    setting = line[len("setting:"):]
+                elif len(line) == 0:
+                    continue
+                else:
+                    prompts.append(line)
+
+            prompt = '\n'.join(prompts)
+            nprompt = '\n'.join(nprompts)
+
+
+            params_list = []
+            params_list.append(
+                ("negative prompt", nprompt)
+            )
             # 翻译？
-            if self.novel_config.get("image").get("translate_bool") and re.search(r"[\u4E00-\u9FA5]", tag):
-                tag = translate_chinese_check(self.novel_config["Translate"]["your_choice"], tag, 0, self.novel_config)
-            for cc in long_cmds:
-                lite_cmds.append(cc)
-            lite_cmds.append(bad_tag)
+            # if self.novel_config.get("image").get("translate_bool") and re.search(r"[\u4E00-\u9FA5]", tag):
+            #     tag = translate_chinese_check(self.novel_config["Translate"]["your_choice"], tag, 0, self.novel_config)
+            # for cc in long_cmds:
+            #     lite_cmds.append(cc)
+            # lite_cmds.append(bad_tag)
             logging.info("[绘画]→ 正在生成图片~")
-            asyncio.run(NovelAiImage().process_mod(tag, lite_cmds, sender_id, novel_config=self.novel_config))
+            asyncio.run(NovelAiImage().process_mod(prompt, params_list, sender_id, novel_config=self.novel_config))
             # md5读取图片并发送
             hash_md5 = hashlib.md5()
-            hash_md5.update("{}{}".format(str(sender_id), tag).encode("utf-8"))
+            hash_md5.update("{}{}".format(str(sender_id), prompt).encode("utf-8"))
             img_md5 = hash_md5.hexdigest()
             mirai_img = mirai.Image(path="novelai-{}-img.png".format(img_md5))
             logging.info("[绘画]→ 图片生成完成~")
