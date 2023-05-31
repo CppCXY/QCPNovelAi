@@ -24,7 +24,7 @@ image:
   translate_bool: True
   # 是否覆盖原有的draw指令？
   # (True/False) 默认 False
-  overwrite_draw: False
+  overwrite_draw: True
 
   default_reverse_tag: "longbody, lowres, bad anatomy, bad hands, missing fingers, pubic hair,extra digit, fewer digits, cropped, worst quality, low quality"
 
