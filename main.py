@@ -348,8 +348,8 @@ class NovelAiImage:
             if novel_noise:
                 preset["noise"] = novel_noise
             if novel_bad_tag:
-                preset.set_custom_uc_preset(novel_model, novel_bad_tag)
-                preset["uc_preset"] = UCPreset.Preset_Custom
+                # preset.uc_preset(novel_model, novel_bad_tag)
+                preset["uc_preset"] = UCPreset.Preset_Low_Quality
 
             # hash md5不唯一生成图片 Tag加上发送者QQ号码
             sender_id = kwargs.get("sender_id")
