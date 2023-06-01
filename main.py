@@ -21,6 +21,7 @@ import mirai
 import requests
 import yaml
 from aiohttp import ClientSession
+from mirai import MessageChain
 
 from pkg.plugin.host import PluginHost, EventContext
 from pkg.plugin.models import *
@@ -505,10 +506,11 @@ https://github.com/dominoar/QCP-NovelAi"""
             img_md5 = hash_md5.hexdigest()
             mirai_img = mirai.Image(path="novelai-{}-img.png".format(img_md5))
             logging.info("[绘画]→ 图片生成完成~")
+            message_chain = MessageChain([mirai_img])
             if launcher_type == "group":
-                host_event.send_group_message(launcher_id, mirai_img)
+                host_event.send_group_message(launcher_id, message_chain)
             else:
-                host_event.send_person_message(launcher_id, mirai_img)
+                host_event.send_person_message(launcher_id, message_chain)
             os.remove("novelai-{}-img.png".format(img_md5))
             event.prevent_default()
 
