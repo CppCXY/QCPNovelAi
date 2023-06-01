@@ -241,9 +241,9 @@ def get_novel_scale(cmd: str, novel_config) -> dict:
 command_dict = {"-m": get_novel_model, "-r": get_novel_size, "-s": get_novel_sampler,
                 "-x": get_novel_seed, "-t": get_novel_steps, "-c": get_novel_scale, "-N": get_novel_strength,
                 "-n": get_novel_noise, "-u": get_novel_bad_tag, "negative prompt": get_novel_bad_tag,
-                "--model": get_novel_model, "--resolution": get_novel_size, "--sampler": get_novel_sampler,
-                "--seed": get_novel_seed, "--steps": get_novel_steps, "--scale": get_novel_scale,
-                "--strength": get_novel_strength, "--noise": get_novel_noise}
+                "model": get_novel_model, "resolution": get_novel_size, "sampler": get_novel_sampler,
+                "seed": get_novel_seed, "steps": get_novel_steps, "scale": get_novel_scale,
+                "strength": get_novel_strength, "noise": get_novel_noise}
 
 
 class NovelAiImage:
@@ -469,35 +469,43 @@ https://github.com/dominoar/QCP-NovelAi"""
 
             prompts = []
             nprompts = []
-            setting = ""
+            params_list = []
 
+            state = 0
             for line in person_msg.split('\n'):
                 line = line.strip()
                 if line.startswith("prompt:"):
                     prompts.append(line[len("prompt:"):])
+                    state = 0
                 elif line.startswith("nprompt:"):
                     nprompts.append(line[len("nprompt:"):])
+                    state = 1
                 elif line.startswith("setting:"):
-                    setting = line[len("setting:"):]
+                    setting: str = line[len("setting:"):]
+                    for p in setting.split(','):
+                        mc = re.match(r"\s*(\w+)\s*:\s*(.+)", p)
+                        if mc:
+                            k = mc.group(1)
+                            v = mc.group(2)
+                            params_list.append((k, v))
+
+                elif line.startswith("--"):
+                    mc = re.match(r"--(\w+)\s+(.+)", line)
+                    if mc:
+                        k = mc.group(1)
+                        v = mc.group(2)
+                        params_list.append((k, v))
                 elif len(line) == 0:
                     continue
-                else:
+                elif state == 0:
                     prompts.append(line)
+                elif state == 1:
+                    nprompts.append(line)
 
             prompt = '\n'.join(prompts)
             nprompt = '\n'.join(nprompts)
+            params_list.append(("negative prompt", nprompt))
 
-
-            params_list = []
-            params_list.append(
-                ("negative prompt", nprompt)
-            )
-            # 翻译？
-            # if self.novel_config.get("image").get("translate_bool") and re.search(r"[\u4E00-\u9FA5]", tag):
-            #     tag = translate_chinese_check(self.novel_config["Translate"]["your_choice"], tag, 0, self.novel_config)
-            # for cc in long_cmds:
-            #     lite_cmds.append(cc)
-            # lite_cmds.append(bad_tag)
             logging.info("[绘画]→ 正在生成图片~")
             asyncio.run(NovelAiImage().process_mod(prompt, params_list, sender_id, novel_config=self.novel_config))
             # md5读取图片并发送
