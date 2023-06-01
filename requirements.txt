@@ -58,3 +58,4 @@ ftfy
 regex
 pygoogletranslation
 googletrans==4.0.0rc1
+novelai_api
